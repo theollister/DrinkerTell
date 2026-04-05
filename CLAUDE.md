@@ -1,4 +1,6 @@
-# CLAUDE.md — DrinkerTell
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Overview
 
@@ -12,8 +14,10 @@ The entire application lives in one file: `drink-and-tell.html`.
 
 ```
 DrinkerTell/
-├── drink-and-tell.html   # Complete application (HTML + CSS + JS, ~505 lines)
-└── CLAUDE.md             # This file
+├── drink-and-tell.html       # Complete application (HTML + CSS + JS, ~567 lines)
+├── .github/workflows/
+│   └── deploy.yml            # GitHub Pages deployment on push to main
+└── CLAUDE.md                 # This file
 ```
 
 There is no build tooling, no package manager, no backend, and no tests.
@@ -80,9 +84,9 @@ state = {
 
 ### Data Model
 
-**Categories** (6 total): `love`, `spicy`, `ethics`, `personality`, `life`, `wild`
+**Categories** (9 total): `love`, `spicy`, `ethics`, `personality`, `life`, `wild`, `nostalgia`, `opinions` (Hot Takes), `hypotheticals` (Would You?)
 
-Each category has exactly 8 questions. Each question has exactly 4 options.
+Each category has multiple questions. Each question has exactly 4 options.
 
 ```javascript
 // Category shape
@@ -191,6 +195,12 @@ newcat: [
   // ... at least a few questions recommended
 ]
 ```
+
+---
+
+## Deployment
+
+The app auto-deploys to GitHub Pages on every push to `main` via `.github/workflows/deploy.yml`. The workflow copies `drink-and-tell.html` to `_site/index.html` and uses the standard `actions/deploy-pages` action. No build step is involved.
 
 ---
 
