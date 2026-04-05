@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate questions.js
+        run: |
+          node << 'EOF'
+          const fs = require('fs');
+          const src = fs.readFileSync('questions.js', 'utf8');
+          const { CATEGORIES, QUESTIONS } = new Function(src + '; return { CATEGORIES, QUESTIONS };')();
+
+          const errors = [];
+
+          // Every category must have a questions entry
+          for (const cat of CATEGORIES) {
+            if (!QUESTIONS[cat.id])
+              errors.push(`Category '${cat.id}' has no questions entry`);
+          }
+
+          // Every questions key must have a matching category
+          for (const key of Object.keys(QUESTIONS)) {
+            if (!CATEGORIES.find(c => c.id === key))
+              errors.push(`QUESTIONS key '${key}' has no matching category`);
+          }
+
+          // Every question must have non-empty text and exactly 4 non-empty options
+          for (const [catId, qs] of Object.entries(QUESTIONS)) {
+            qs.forEach((q, i) => {
+              if (!q.q || !q.q.trim())
+                errors.push(`${catId}[${i}]: empty question text`);
+              if (!Array.isArray(q.opts) || q.opts.length !== 4)
+                errors.push(`${catId}[${i}]: expected 4 options, got ${q.opts?.length ?? 0}`);
+              else
+                q.opts.forEach((o, j) => {
+                  if (!o || !o.trim())
+                    errors.push(`${catId}[${i}] opt[${j}]: empty option text`);
+                });
+            });
+          }
+
+          if (errors.length) {
+            console.error(`Found ${errors.length} error(s):`);
+            errors.forEach(e => console.error('  ✗', e));
+            process.exit(1);
+          }
+
+          const total = Object.values(QUESTIONS).flat().length;
+          console.log(`✓ ${CATEGORIES.length} categories, ${total} questions — all valid`);
+          EOF
