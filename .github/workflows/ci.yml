@@ -14,7 +14,8 @@ jobs:
         run: |
           node << 'EOF'
           const fs = require('fs');
-          eval(fs.readFileSync('questions.js', 'utf8'));
+          const src = fs.readFileSync('questions.js', 'utf8');
+          const { CATEGORIES, QUESTIONS } = new Function(src + '; return { CATEGORIES, QUESTIONS };')();
 
           const errors = [];
 
